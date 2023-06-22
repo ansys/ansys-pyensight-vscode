@@ -1,41 +1,25 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import fs = require('fs');
-import { PyEnSightWebPanel } from "./webpanel";
+import { PythonPyEnSightAugmenter } from "./python_augmenter";
 import process = require('process');
 import * as vscode from 'vscode';
-import { workspace } from 'vscode';
+declare global {
+	var pyensightDebug: any; 
+	var augmenter: PythonPyEnSightAugmenter | undefined;
+};
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
+	globalThis.pyensightDebug = {called: false};
+	globalThis.augmenter = undefined;
 	console.log('Congratulations, your extension "pyensight" is now active!');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	//let disposable = vscode.commands.registerCommand('pyensight.helloWorld', () => {
-//		// The code you place here will be executed every time your command is executed
-		//// Display a message box to the user
-		//vscode.window.showInformationMessage('Hello World from PyEnSight!');
-	//});
 	let helpCmd = vscode.commands.registerCommand('pyensight.Help', () => {
         vscode.window.showInformationMessage("This extension gives you the ability of creating EnSight script and debugging them using PyEnSight");
     });
 	context.subscriptions.push(helpCmd);
-
-	let disposable = vscode.languages.registerHoverProvider("python", {
-        provideHover(document, position, token) {
-			const range = document.getWordRangeAtPosition(position);
-			const word = document.getText(range);
-			
-            return new vscode.Hover("For all Python");
-
-        }
-    });
-
-	context.subscriptions.push(disposable);
 
 	var isWin = process.platform === "win32";
 	let installPyEnSight = vscode.commands.registerCommand('pyensight.Install', () => {
@@ -71,26 +55,36 @@ export function activate(context: vscode.ExtensionContext) {
 	
 	context.subscriptions.push(
 		vscode.commands.registerCommand('pyensight.debug', async () => {
+			globalThis.pyensightDebug.called = true;
 			if (vscode.window.activeTextEditor){
-				const session = vscode.debug.activeDebugSession;
-				if (session){
-					const responseFrameId = await session.customRequest('stackTrace', { threadId: 1 });
-					const frameId = await responseFrameId.stackFrames[0].id;
-					const scope = await responseFrameId.stackFrames[0].scope;
-					const variables = await responseFrameId.stackFrames[0].variables;
-					for (let variable of variables){
-						if (variable.class.name === "Session"){
-							var sessionVariable = variable.class.name;
-							const response = await session?.customRequest('evaluate', {expression: `${sessionVariable}.show("remote")._url`, frameId: frameId});
-							let result = response.result.substring(1, response.result.length-1);
-							PyEnSightWebPanel.createOrShow(context.extensionUri, result);
-						};
-					};
+				let uri = vscode.workspace.getWorkspaceFolder(vscode.window.activeTextEditor.document.uri);
+				let config = vscode.workspace.getConfiguration("launch", uri);
+				const configurations = config.get<any[]>("configurations");
+				if (!configurations) {
+					return;
 				}
-		}}
-		)
-	);
-
+				let selectedConfig: string;
+				for (let config of configurations)
+				{
+					if (config.name.includes("Python")){
+						selectedConfig = config.name;
+						vscode.debug.startDebugging(uri, selectedConfig);
+						break;
+					}
+				};		
+			}
+		}));
+		context.subscriptions.push(
+			vscode.debug.registerDebugAdapterTrackerFactory("python", {
+				createDebugAdapterTracker(session: vscode.DebugSession){
+					if (globalThis.augmenter === undefined && globalThis.pyensightDebug.called === true)
+					{
+						globalThis.augmenter = new PythonPyEnSightAugmenter(context.extensionUri, session);
+					}
+					return globalThis.augmenter;
+				}
+			})
+		);
 }
 
 // This method is called when your extension is deactivated

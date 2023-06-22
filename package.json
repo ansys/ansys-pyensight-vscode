@@ -10,10 +10,20 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:python"
+    "onLanguage:python",
+    "onDebugAdapterProtocolTracker"
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "calicoColors.colorsView",
+          "name": "Calico Colors"
+        }
+      ]
+    },
     "languages": [
       {
         "id": "python",
@@ -33,7 +43,7 @@
       },
       {
         "command": "pyensight.debug",
-        "title": "PyEnSight: View current breakpoint remote session"
+        "title": "PyEnSight: Launch PyEnSight Debug Session"
       }
     ]
   },
@@ -66,8 +76,11 @@
   },
   "dependencies": {
     "@vscode/ripgrep": "^1.15.3",
+    "@vscode/vsce": "^2.19.0",
     "axios": "^1.4.0",
     "node-fetch": "^3.3.1",
+    "vscode-debugadapter": "^1.51.0",
+    "vscode-debugprotocol": "^1.51.0",
     "vscode-ripgrep": "^1.13.2"
   },
   "extensionDependencies": [
