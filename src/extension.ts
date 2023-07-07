@@ -1,6 +1,6 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
-import { PythonPyEnSightAugmenter } from "./python_augmenter";
+import { PythonPyEnSightAugmenter, PyEnSightCompletionItemProvider } from "./python_augmenter";
 import process = require('process');
 import * as vscode from 'vscode';
 declare global {
@@ -85,6 +85,9 @@ export function activate(context: vscode.ExtensionContext) {
 				}
 			})
 		);
+		let schemed: string[] = [];
+		context.subscriptions.push(vscode.languages.registerCompletionItemProvider({language: "python"}, new PyEnSightCompletionItemProvider(), "."));
+		context.subscriptions.push(vscode.languages.registerTypeDefinitionProvider({language: "python"}, new PyEnSightCompletionItemProvider()));
 }
 
 // This method is called when your extension is deactivated
