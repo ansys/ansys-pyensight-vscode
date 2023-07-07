@@ -85,7 +85,6 @@
   },
   "extensionDependencies": [
     "ms-python.python"
-
   ],
   "extensionPack": [
     "ms-python.python"
