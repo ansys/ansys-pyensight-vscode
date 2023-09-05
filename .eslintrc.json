@@ -19,9 +19,6 @@
     "ignorePatterns": [
         "out",
         "dist",
-        "**/*.d.ts",
-        "node_modules/"
-        "**/node_modules/"
-        "/**/node_modules/*"
+        "**/*.d.ts"
     ]
 }
