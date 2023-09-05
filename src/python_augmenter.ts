@@ -1,14 +1,11 @@
 /// <reference path="extension.ts" />
 import * as vscode from 'vscode';
-import { ProviderResult } from 'vscode';
 import { DebugProtocol } from 'vscode-debugprotocol';
 import { PyEnSightWebPanel } from "./webpanel";
-import { mkdtemp, writeFile, unlinkSync } from "fs";
-import { join } from 'path';
-import { tmpdir } from 'os';
-import { CompletionItem } from 'vscode-debugadapter';
+import * as fetch from "node-fetch";
 
 
+const utilsNames = ["views", "export", "parts", "support", "query"];
 class MySessionItems implements vscode.QuickPickItem{
     label: string;
     name: string;
@@ -17,20 +14,64 @@ class MySessionItems implements vscode.QuickPickItem{
         this.label = `Session Object: ${name}`;
     }
 }
+class RenderItem implements vscode.QuickPickItem{
+    label: string;
+    description: string;
+    constructor(label: string, description: string){
+        this.label = label;
+        this.description = description;
+    }
+}
 
-export class PythonPyEnSightAugmenter implements vscode.DebugAdapterTracker{
-    private _uri: vscode.Uri;
-    private _input: string | undefined;
+let renderItems: RenderItem[] = [];
+const remoteText = "A VNC stream of the current EnSight rendering window with a simple webUI";
+renderItems.push(new RenderItem("image", "A picture of the current EnSight status"));
+renderItems.push(new RenderItem("deep_pixel", "A deep pixel picture of the current EnSigth status"));
+renderItems.push(new RenderItem("animation", "A transient animation of the current dataset and status in EnSight."));
+renderItems.push(new RenderItem("webgl", "An embedded AVZ viewer showing the current status of EnSight exported in AVZ"));
+renderItems.push(new RenderItem("remote", "A VNC stream of the current EnSight rendering window with a simple webUI"));
+renderItems.push(new RenderItem("remote_scene", "A VNC stream to an EnVision instance showing the curren status of EnSight exported as a scenario."));
+renderItems.push(new RenderItem("webensight", "A VNC stream of the current EnSight rendering window with a full webUI"));
+
+
+
+export class PyEnSightWebView {
     private _sessionSelected: any;
-    private _debugSession: vscode.DebugSession;
-    constructor(contextUri: vscode.Uri, session: vscode.DebugSession){
-        this._uri = contextUri;
-        this._input = undefined;
+    protected _context: vscode.ExtensionContext;
+    protected _uri: vscode.Uri;
+    protected _debugSession: vscode.DebugSession;
+    protected _input: RenderItem | undefined;
+    protected _webpanel!: PyEnSightWebPanel;
+    constructor(context: vscode.ExtensionContext, session: vscode.DebugSession){
+        this._context = context;
         this._sessionSelected = undefined;
         this._debugSession = session;
+        this._uri = context.extensionUri;
     };
-    async onWillStartSession(){
-        if (pyensightDebug.called === true && this._input === undefined){
+
+    async createResponse(variable: any){
+        const expression = `${variable.name}.show("${this._input!.label}")._url`;
+        const responseFrameId = await this._debugSession.customRequest('stackTrace', { threadId: 1 });
+        const frameId = await responseFrameId.stackFrames[0].id;
+        if (this._input!.label === "webensight"){
+
+            const rest = await this._debugSession?.customRequest('evaluate', {expression: `${variable.name}._rest_api_enabled`, frameId: frameId});
+            if (rest.result === "False"){
+                vscode.window.showErrorMessage(`The webensight renderable couldn't be started. The rest api needs to be enabled in the launcher.`);
+            }
+        }
+        const response = await this._debugSession?.customRequest('evaluate', {expression: expression, frameId: frameId});
+
+        if (response.result.toLowerCase().includes("error")){
+            vscode.window.showErrorMessage(`The renderable couldn't be started. Expression: ${expression}, result: ${response.result}`);
+        }
+        let result = response.result.substring(1, response.result.length-1);
+        PyEnSightWebPanel.createOrShow(this._uri, result);
+    }
+
+    protected async selectRenderable(condition: boolean){
+
+        if (condition){
             const options: vscode.QuickPickOptions = {
                 canPickMany: false,
                 title: "Select Renderable Kind",
@@ -39,21 +80,99 @@ export class PythonPyEnSightAugmenter implements vscode.DebugAdapterTracker{
 
             };
             this._input = await vscode.window.showQuickPick(
-                ['image', 'deep_pixel', 'webgl', 'animation', 'remote', 'remote_scene'], 
+                renderItems, 
                 options
             );
             if (this._input === undefined){
-                this._input = "remote";
+                this._input = new RenderItem("remote", remoteText);
             }
-            vscode.window.showInformationMessage(`Selected Renderable: ${this._input}`);
-    }
+            vscode.window.showInformationMessage(`Selected Renderable: ${this._input.label}`);
+        }
     }
 
-    async createResponse(variable: any, frameId: number){
-        const response = await this._debugSession?.customRequest('evaluate', {expression: `${variable.name}.show("${this._input}")._url`, frameId: frameId});
-        let result = response.result.substring(1, response.result.length-1);
-        PyEnSightWebPanel.createOrShow(this._uri, result);
+    protected async findSession(scopes: any){
+        for (let scope of scopes)
+        {
+            if (scope.name === "Locals")
+            {
+                var reference = scope.variablesReference;
+                const variables = await this._debugSession.customRequest('variables', {variablesReference: reference});
+
+                let sessionVariables: any[] = [];
+                 for (let variable of variables.variables){
+                    if (variable.type === "Session"){
+                        sessionVariables.push(variable);
+                    };
+                };
+                if (sessionVariables.length > 1 && this._sessionSelected === undefined)
+                {
+                    const items = sessionVariables.map((item) => {
+                        return new MySessionItems(
+                            item.name,
+                        );
+                    });
+                    const options: vscode.QuickPickOptions = {
+                        canPickMany: false,
+                        title: "Select Session Object to display",
+                        placeHolder: 'Select Session Object',
+                        ignoreFocusOut: true,
+                    };
+
+                    let selectedName = await vscode.window.showQuickPick(
+                        items, 
+                        options
+                    );
+                    for (let sessionVariable of sessionVariables){
+                        if (selectedName?.name === sessionVariable.name)
+                        {
+                            this._sessionSelected = sessionVariable;
+                            break;
+                        }
+                    }
+                }
+                else
+                {
+                    if (this._sessionSelected === undefined)
+                    {
+                        if (sessionVariables.length > 0)
+                        {
+                            this._sessionSelected = sessionVariables[0];
+                        }
+                    }
+                }
+            }
+        }
     }
+
+    public async launchWebView(){
+        if (this._input === undefined){
+            await this.selectRenderable(true);
+        }
+        if (!this._sessionSelected){
+            
+            const responseFrameId = await this._debugSession.customRequest('stackTrace', { threadId: 1 });
+            const frameId = await responseFrameId.stackFrames[0].id;
+            const scopeReply = await this._debugSession.customRequest('scopes', {frameId: frameId});
+            const scopes = scopeReply.scopes;
+            await this.findSession(scopes);
+        }
+        if (this._sessionSelected)
+            {
+                await this.createResponse(this._sessionSelected);
+            }
+        }  
+    } 
+
+export class PythonPyEnSightAugmenter extends PyEnSightWebView implements vscode.DebugAdapterTracker {
+    
+    constructor(context: vscode.ExtensionContext, session: vscode.DebugSession){
+        super(context, session);
+    };
+    
+    async onWillStartSession(){
+        await this.selectRenderable(pyensightDebug.called === true && this._input === undefined);
+    }
+    
 
     async onDidSendMessage(message: DebugProtocol.ProtocolMessage) {
         if (pyensightDebug.called === true){
@@ -61,334 +180,163 @@ export class PythonPyEnSightAugmenter implements vscode.DebugAdapterTracker{
 		        const event = message as DebugProtocol.Event;
 		        if (event.event === 'stopped') {	
                     if (this._debugSession){
-                        const responseFrameId = await this._debugSession.customRequest('stackTrace', { threadId: 1 });
-                        const frameId = await responseFrameId.stackFrames[0].id;
-                        const scopeReply = await this._debugSession.customRequest('scopes', {frameId: frameId});
-                        const scopes = scopeReply.scopes;
-                        for (let scope of scopes)
-                        {
-                            if (scope.name === "Locals")
-                            {
-                                var reference = scope.variablesReference;
-                                const variables = await this._debugSession.customRequest('variables', {variablesReference: reference});
-                                let sessionVariables: any[] = [];
-                                 for (let variable of variables.variables){
-                                    if (variable.type === "Session"){
-                                        sessionVariables.push(variable);
-                                    };
-                                };
-                                if (sessionVariables.length > 1 && this._sessionSelected === undefined)
-                                {
-                                    const items = sessionVariables.map((item) => {
-                                        return new MySessionItems(
-                                            item.name,
-                                        );
-                                    });
-                                    const options: vscode.QuickPickOptions = {
-                                        canPickMany: false,
-                                        title: "Select Session Object to display",
-                                        placeHolder: 'Select Session Object',
-                                        ignoreFocusOut: true,
-                                    };
-
-                                    let selectedName = await vscode.window.showQuickPick(
-                                        items, 
-                                        options
-                                    );
-                                    for (let sessionVariable of sessionVariables){
-                                        if (selectedName?.name === sessionVariable.name)
-                                        {
-                                            this._sessionSelected = sessionVariable;
-                                            break;
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    if (this._sessionSelected === undefined)
-                                    {
-                                        if (sessionVariables.length > 0)
-                                        {
-                                            this._sessionSelected = sessionVariables[0];
-                                        }
-                                    }
-                                }
-                                if (this._sessionSelected)
-                                {
-                                    this.createResponse(this._sessionSelected, frameId);
-                                }
-                            }   
-
-                    
-		                }
-	                }
-                }
+                        await this.launchWebView();
+                    }
+                } 
             }
         }
     }
+
     onWillStopSession() {
        pyensightDebug.called = false;
        augmenter = undefined;
+       PyEnSightWebPanel.currentPanel?.dispose();
+
     }
 }
-export class PyEnSightCompletionItemProvider implements vscode.CompletionItemProvider, vscode.TypeDefinitionProvider {
-    private tempFile (name = 'temp_file', data = '') {
-
-        return new Promise((resolve, reject) => {
-            const tempPath = join(tmpdir(), 'foobar-');
-            mkdtemp(tempPath, (err, folder) => {
-                if (err) 
-                    {return reject(err);}
-    
-                const fileName = join(folder, name);
-                writeFile(fileName, data, errorFile => {
-                    if (errorFile) 
-                        {return reject(errorFile);}
-    
-                    resolve(fileName);
-                });
-            });
-        });
-    }
-
-    private async buildTypeData(value: string, data: string, line: number, length: number): Promise<vscode.Location[]>
-    {
-        let fileName = "temp_"+value.toLowerCase()+".py";
-        let ms = await this.tempFile(fileName, data);
-        let uri = vscode.Uri.file(ms as string);
-        let correctValues: vscode.Location[] = await vscode.commands.executeCommand(
-            "vscode.executeDefinitionProvider",
-            uri,
-            new vscode.Position(line, length),
-        );
-        return correctValues;
-    }
-
-    private async buildData(correctValue: string, data: string, line: number, length: number,  position: vscode.Position): Promise<vscode.CompletionItem[] | null | undefined>{
-        let fileName = "temp_"+correctValue.toLowerCase()+".py";
-        let ms = await this.tempFile(fileName, data);
-        let uri = vscode.Uri.file(ms as string);
-        let correctValues: vscode.CompletionList = await vscode.commands.executeCommand(
-            "vscode.executeCompletionItemProvider",
-            uri,
-            new vscode.Position(line, length),
-        );
-        unlinkSync(ms as string);
-        let _items: vscode.CompletionItem[] = [];
-        for (let index in correctValues.items){
-            let element = correctValues.items[index];
-            let item = new vscode.CompletionItem(element.label, vscode.CompletionItemKind.Field);
-            item.range = new vscode.Range(position, position);
-            item.documentation = element.documentation;
-            item.detail = element.detail;
-            item.filterText = element.filterText;
-            item.insertText = element.insertText;
-            item.kind = element.kind;
-            item.command = element.command;
-            item.tags = element.tags;
-            item.sortText = index.toString().padStart(5, "0");
-            _items.push(item);
-        }
-        return _items;
-    }
-
-    private async buildEnSightUtilsCompletion(word: string, document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | null | undefined>{
-        if (context.triggerKind !== vscode.CompletionTriggerKind.TriggerCharacter || context.triggerCharacter !== "."){
-            return;
-        }
-        let lineVal = word.toLowerCase()+"."+word[0].toUpperCase()+word.substring(1).toLowerCase();
-        let data = "from ansys.pyensight.core.utils import "+ word.toLowerCase()+"\n"+lineVal+".";
-        return this.buildData(lineVal, data, 1, lineVal.length+1, position);
-    }
 
 
-    private async findTypeDefinition(typeDefValue: vscode.Location[] | vscode.LocationLink[] | undefined, document: vscode.TextDocument, newPosition: vscode.Position): Promise<vscode.Location[] | vscode.LocationLink[] | null | undefined>
-    {
+export class PyEnSightHover implements vscode.HoverProvider{
+    private baseURL = "https://ensight.docs.pyansys.com/version/stable/_autosummary/";
 
-        if (typeDefValue){
-            let sourceURI: vscode.Uri = (typeDefValue[0] as vscode.Location).uri;
-            let sourceRange: vscode.Range =  (typeDefValue[0] as vscode.Location).range;
-            let doc: vscode.TextDocument = await vscode.workspace.openTextDocument(sourceURI);
-            let sourceLine = doc.lineAt(sourceRange.start.line);
-            if (sourceURI.fsPath === vscode.Uri.file(document.fileName).fsPath){
-                let _typeDefValue: vscode.Location[] | vscode.LocationLink[] = await vscode.commands.executeCommand(
-                    "vscode.executeTypeDefinitionProvider",
-                    vscode.Uri.file(document.fileName),
-                    new vscode.Position(sourceLine.lineNumber, sourceLine.text.length-1),
-                );
-                return _typeDefValue;
-            }
-            return typeDefValue;
-       }
-       else{
-        let itemNames: string[] = ["views", "export", "parts", "support", "query"];
-        let fullLine = document.lineAt(newPosition.line).text;
-        let word = document.getText(document.getWordRangeAtPosition(newPosition));
-        let foundSubUtils = false;
-        if (itemNames.indexOf(word) > -1 && fullLine.includes("ensight.utils."))
+    private async buildStandard(kind: string, uri: string, _uri: vscode.Location){
+        const doc = vscode.workspace.openTextDocument(uri);
+        const word = (await doc).getText(_uri.range);
+        let base: string;
+        base = `https://ensight.docs.pyansys.com/version/stable/_autosummary/ansys.pyensight.core.${kind}.${word}.html`;
+        let val: string;
+        val = `${base}#ansys.pyensight.core.${kind}.${word}`;
+        if (kind === "EnsContext")
         {
-            foundSubUtils = true;
+            val = `https://ensight.docs.pyansys.com/version/stable/_autosummary/ansys.pyensight.core.enscontext.EnsContext.html`;
         }
-        if (foundSubUtils){
-            let data = "from ansys.pyensight.core.utils."+word+" import "+word[0].toUpperCase()+word.substring(1).toLowerCase();
-            return this.buildTypeData(word, data, 0, data.length-1);
-        } 
-        let _typeDefValue: vscode.Location[] | vscode.LocationLink[] = await vscode.commands.executeCommand(
-            "vscode.executeDefinitionProvider",
-            vscode.Uri.file(document.fileName),
-            newPosition
-        );
-        return _typeDefValue;
-       }
+        else if (kind.toLowerCase().includes("launcher") && word.toLowerCase().includes("launcher")){
+            val = `https://ensight.docs.pyansys.com/version/stable/_autosummary/ansys.pyensight.core.${kind}.html`;
+        }
+        if (await this.checkURL(val) === 200){
+            return val;
+        }
+        return;
     }
 
-    private async buildENSCompletion(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext, item: boolean =false, newPosition: vscode.Position): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined>{
-        if (context.triggerKind !== vscode.CompletionTriggerKind.TriggerCharacter || context.triggerCharacter !== "."){
+    private async checkURL(url: string){
+        const response = fetch.default(new URL(url));
+        return (await response).status;
+    }
+
+    private async buildURL(
+        _uri: vscode.Location, 
+        document: vscode.TextDocument, 
+        position: vscode.Position,
+    ){
+        const uri = _uri.uri.path;
+        const ansys = uri.includes("ansys");
+        const api = uri.includes("api/pyensight");
+        const core = uri.includes("pyensight/core");
+        const ens = uri.includes("pyensight/ens_");
+        if (ansys === false){
             return;
         }
-        let typeDefValue: vscode.Location[] | vscode.LocationLink[] = await vscode.commands.executeCommand(
-            "vscode.executeTypeDefinitionProvider",
-            vscode.Uri.file(document.fileName),
-            new vscode.Position(newPosition.line, newPosition.character),
+        if (api === false && core === false && ens === false){
+            return;
+        }
+        if (uri){
+            let val = "https://ensight.docs.pyansys.com/version/stable/index.html";
+            const index = uri.lastIndexOf("ansys");
+            let subPath = uri.substring(index);
+            if (subPath.includes("utils")){
+                const lastVal = subPath.substring(subPath.lastIndexOf("/")+1).replace(".py", "");
+                subPath = subPath.replace(".py", "").replace(/\//g, ".");
+                return `${this.baseURL}${subPath}.${lastVal[0].toUpperCase()}${lastVal.substring(1)}.html`;
+            }
+            if (subPath.includes("ensight_api")){
+                if (document.lineAt(position.line).text.includes("ensight.utils.")){
+                    let word = document.getText(document.getWordRangeAtPosition(position));
+                    const adjusted = `${word[0].toUpperCase()}${word.substring(1)}`;
+                    val = `${this.baseURL}ansys.pyensight.core.utils.${word}.${adjusted}.html`;
+                }
+                else{
+                    const native = val = "https://ensight.docs.pyansys.com/version/stable/native_documentation.html";
+                    subPath = subPath.replace(".py", "").replace(/\//g, ".");
+                    const doc = await vscode.workspace.openTextDocument(uri);
+                    let word = doc.getText(_uri.range);
+                    const base = `${this.baseURL}${subPath}.${word}.html`;
+                    val = `${base}#${subPath}.${word}`;
+                    if (await this.checkURL(val) !== 200){
+                        //val = native;
+                        const newPosition = new vscode.Position(
+                            position.line,
+                            document.lineAt(position.line).text.indexOf(word)-2
+                        );
+                        word = document.getText(document.getWordRangeAtPosition(newPosition));
+                        const base = `${this.baseURL}${subPath}.${word}.html`;
+                        val = `${base}#${subPath}.${word}`;
+                        if (await this.checkURL(val) !== 200){
+                            val = native;
+                        }
+                    }
+                }
+            }
+            if (subPath.includes("session")){
+                return await this.buildStandard("Session", uri, _uri);
+            }
+            if (subPath.includes("renderable")){
+                return await this.buildStandard("Renderable", uri, _uri);
+            }
+            if (subPath.includes("locallauncher")){
+                return await this.buildStandard("LocalLauncher", uri, _uri);
+            }
+            if (subPath.includes("dockerlauncher")){
+                return await this.buildStandard("DockerLauncher", uri, _uri);
+            }
+            if (subPath.includes("enscontext")){
+               return await this.buildStandard("EnsContext", uri, _uri);
+            }
+            if (ens === true){
+                const lastVal = subPath.substring(subPath.lastIndexOf("/")+1).replace(".py", "");
+                subPath = subPath.replace(".py", "").replace(/\//g, ".");
+                const adjusted = `${subPath}.${lastVal.toUpperCase()}`;
+                const doc = vscode.workspace.openTextDocument(uri);
+                const word = (await doc).getText(_uri.range);
+                const base = `${this.baseURL}${adjusted}.${word.toUpperCase()}.html`;
+                return `${base}#${adjusted}.${word}`;
+            }
+            if (await this.checkURL(val) === 200){
+                return val;
+            }
+            return;
+        }
+    }
+
+    async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | null | undefined >{
+
+        let value: vscode.Location[] = await vscode.commands.executeCommand(
+            "vscode.executeDefinitionProvider", 
+            document.uri, 
+            position
         );
-        let sourceURI: vscode.Uri = (typeDefValue[0] as vscode.Location).uri;
-        if (sourceURI.fsPath === vscode.Uri.file(document.fileName).fsPath){
-            let _temp = await this.findTypeDefinition(typeDefValue, document, newPosition);
-            if (_temp){
-                typeDefValue = _temp;
-            }
-        }
-        let returnText = "";
-        if (typeDefValue){
-            sourceURI = (typeDefValue[0] as vscode.Location).uri;
-            let sourceRange  =  (typeDefValue[0] as vscode.Location).range;
-            let doc = await vscode.workspace.openTextDocument(sourceURI);
-            let sourceLine = doc.lineAt(sourceRange.start.line);
-            let pattern: RegExp = new RegExp('-> ([^]+)');
-            let returnType = pattern.exec(sourceLine.text);
-            if (returnType){
-                returnText = returnType[1].trim().replace(new RegExp("'", 'g'), "").replace(new RegExp(":", 'g'), "");
-            }
-        }
-        if (returnText){
-            if (returnText.includes("ensobjlist"))
-            {
-                let stringFound = new RegExp('\\[([^]+)\\]').exec(returnText);
-                if (stringFound){
-                    let correctString = stringFound[1];
-                    if (item === false){
-                      let data = "from ansys.api.pyensight."+correctString.toLowerCase()+" import "+correctString+"\nfrom ansys.pyensight.core.listobj import ensobjlist\nobj="+correctString+"()\nensobjlist(obj).";
-                        let toUse = "ensobjlist(obj).";
-                        return this.buildData(correctString, data, 3, toUse.length, position);
-                    }
-                    else{
-                        let data = "from ansys.api.pyensight."+correctString.toLowerCase()+" import "+correctString+"\nobj="+correctString+"().";
-                        let toUse = "obj="+correctString+"().";
-                        return this.buildData(correctString, data, 1, toUse.length, position);
-                    }
+        if (value.length > 0){
+            if (value[0].uri.path === document.uri.path){
+                const newPosition = new vscode.Position(value[0].range.start.line, value[0].range.start.character);
+                let character = document.lineAt(newPosition.line).text.indexOf("(") - 1;
+                if (character < 0){
+                    character = document.lineAt(newPosition.line).range.end.character;
                 }
+                const word = document.getText(document.getWordRangeAtPosition(
+                    new vscode.Position(newPosition.line, character)
+                ));
+                value =  await vscode.commands.executeCommand(
+                    "vscode.executeDefinitionProvider", 
+                    document.uri, 
+                    new vscode.Position(newPosition.line, character)
+                );
             }
-            else if (returnText.includes("ENS_"))
-            {
-                let data = "from ansys.api.pyensight."+returnText.toLowerCase()+" import "+returnText+"\nobj="+returnText+"().";
-                let toUse = "obj="+returnText+"().";
-                return this.buildData(returnText, data, 1, toUse.length, position);
+            const url = await this.buildURL(value[0], document, position);
+            if (url){
+                return new vscode.Hover((new vscode.MarkdownString(url)));
             }
-            else{
-                let data = "obj="+returnText+"().";
-                return this.buildData(returnText, data, 0, data.length, position);
-            }
-
+            return;    
         }
+        return;
     }
-
-
-    private async hardwork(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined>{
-        
-        if (
-            context.triggerKind === vscode.CompletionTriggerKind.TriggerCharacter && 
-            context.triggerCharacter === "."  &&
-            !document.fileName.toString().includes("temp_")
-        ){
-            let values: vscode.CompletionList = await vscode.commands.executeCommand(
-                "vscode.executeCompletionItemProvider",
-                vscode.Uri.file(document.fileName),
-                new vscode.Position(position.line, position.character),
-            );
-            let foundENS = false;
-            let foundEnSight = false;
-            let foundUtils = false;
-            let foundSubUtils = false;
-            let item = false;
-            let newPosition = new vscode.Position(position.line, position.character - 1);
-            let word = document.getText(document.getWordRangeAtPosition(newPosition));
-            let line = document.lineAt(position.line);
-            if (line.text.includes("[") || line.text.includes("]")){
-                let lastValue = (line.text.split(".").at(-2) as string);
-                let pattern: RegExp = new RegExp('([^]+)(\\[[0-9]+\\])');
-                let found = lastValue.match(pattern);
-                if (found){
-                    newPosition = new vscode.Position(position.line, line.text.length - found[2].length-1);
-                    word = document.getText(document.getWordRangeAtPosition(newPosition));
-                    item = true;
-                }
-            }
-            let hoverValues: vscode.Hover[] = await vscode.commands.executeCommand(
-                "vscode.executeHoverProvider",
-                vscode.Uri.file(document.fileName),
-                new vscode.Position(newPosition.line, newPosition.character),
-            );
-            let hovervalue = (hoverValues[0].contents[0] as vscode.MarkdownString).value;
-            if (hovervalue.includes("property")){
-                foundENS = true;
-            }
-            for (let item of values.items){
-                if (word === "ensight" && item.label === "objs" && item.kind === vscode.CompletionItemKind.Variable){
-                    foundEnSight = true;
-                    break;
-                }
-            }
-            let itemNames: string[] = ["views", "export", "parts", "support", "query"];
-            let fullLine = document.lineAt(position.line).text;
-            if (word === "utils" && fullLine.includes("ensight.")){
-                foundUtils = true;
-            }
-            if (itemNames.indexOf(word) > -1 && fullLine.includes("ensight.utils."))
-            {
-                foundSubUtils = true;
-            }
-            if (foundENS === true && foundEnSight === false){
-                return this.buildENSCompletion(document, position, token, context, item, newPosition);
-            }
-            if (foundEnSight){
-                let item = new vscode.CompletionItem("utils", vscode.CompletionItemKind.Variable);
-                item.range = new vscode.Range(position, position);
-                return [item];
-            }
-            if (foundUtils){
-                let items: vscode.CompletionItem[] = [];
-                for (let index in itemNames){
-                    let item = new vscode.CompletionItem(itemNames[index], vscode.CompletionItemKind.Variable);
-                    item.range = new vscode.Range(position, position);
-                    items.push(item);
-                }
-                return items;
-            }
-            if (foundSubUtils){
-                return this.buildEnSightUtilsCompletion(word, document, position, token, context);
-            }
-        }
-    }
-
-    async provideTypeDefinition(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken):  Promise<vscode.Definition | vscode.LocationLink[] | null | undefined>
-    {
-        return await this.findTypeDefinition(undefined, document, position);
-    }
-
-    async provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext): Promise<vscode.CompletionItem[] | vscode.CompletionList<vscode.CompletionItem> | null | undefined> {
-    {   
-        return await this.hardwork(document, position, token, context);
-    }
-}
-
 }

@@ -50,7 +50,7 @@ export class PyEnSightWebPanel {
 		PyEnSightWebPanel.currentPanel = new PyEnSightWebPanel(panel, extensionUri, url);
 	}
 
-	private constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, url: string) {
+	public constructor(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, url: string) {
 		this._panel = panel;
 		this._extensionUri = extensionUri;
 		this._url = url;
@@ -128,25 +128,43 @@ export class PyEnSightWebPanel {
 		_html = `<!DOCTYPE html>
 		<html lang="en">
 		<head>
+				<style>
+				.container {
+					position: relative;
+					overflow: hidden;
+					width: 100%;
+					padding-top: 100%;
+					max-width: 800px;
+					max-height: 800px;
+				  }
+				  
+				  .responsive-iframe {
+					position: absolute;
+					top: 0;
+					left: 0;
+					bottom: 0;
+					right: 0;
+					width: 100%;
+					height: 100%;
+				  }
+
+ 			</style>
 			<meta charset="UTF-8">
-			<meta name="viewport" content="width=device-width, initial-scale=1.0">
 			<title>PyEnSight Renderable IFrame</title>
-			<style>
-				h1 {text-align: center;}
-				h3 {text-align: center;}
-			</style>
 		</head>
 		<body>
-		<iframe id="renderable_iframe" src="${this._url}" name="Renderable" height="600" width="800">
-			You need a Frames Capable browser to view this content.
-			<script type="text/javascript">
-				document.getElementById('my_iframe').onload = function() {
-					document.getElementById('renderable_iframe').src = '';
-					document.getElementById('renderable_iframe').src = "${this._url}";
-				}
-			</script>
-		</iframe>  
-			</body>
+		<div class="container">
+				<iframe class="responsive-iframe" id="renderable_iframe" src="${this._url}" name="Renderable" height="100%" width="100%">
+					You need a Frames Capable browser to view this content.
+					<script type="text/javascript">
+						document.getElementById('my_iframe').onload = function() {
+							document.getElementById('renderable_iframe').src = '';
+							document.getElementById('renderable_iframe').src = "${this._url}";
+						}
+					</script>
+				</iframe>
+			</div>
+		</body>
 		</html>`;
 		return _html;
 	}

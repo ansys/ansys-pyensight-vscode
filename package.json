@@ -1,8 +1,9 @@
 {
   "name": "pyensight",
+  "publisher": "ansys",
   "displayName": "PyEnSight",
   "description": "A VS Code extension to write and debug EnSight Scripts",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -15,15 +16,6 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "views": {
-      "explorer": [
-        {
-          "type": "webview",
-          "id": "calicoColors.colorsView",
-          "name": "Calico Colors"
-        }
-      ]
-    },
     "languages": [
       {
         "id": "python",
@@ -43,7 +35,63 @@
       },
       {
         "command": "pyensight.debug",
-        "title": "PyEnSight: Launch PyEnSight Debug Session"
+        "title": "PyEnSight: Launch Debug Session"
+      },
+      {
+        "command": "pyensight.webview",
+        "title": "PyEnSight: Launch WebView"
+      },
+      {
+        "command": "pyensight.docs",
+        "title": "PyEnSight: Open the PyEnSight documentation"
+      },
+      {
+        "command": "pyensight.apidocs",
+        "title": "PyEnSight: Open the EnSight Python API documentation"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "pyensight.debug",
+          "when": "resourceLangId == python"
+        },
+        {
+          "command": "pyensight.webview",
+          "when": "resourceLangId == python"
+        }
+      ],
+      "editor/title/run": [
+        {
+          "command": "pyensight.debug",
+          "when": "resourceLangId == python"
+        },
+        {
+          "command": "pyensight.webview",
+          "when": "resourceLangId == python"
+        }
+      ]
+    },
+    "snippets": [
+      {
+        "language": "python",
+        "path": "./snippets/pyensight.json"
+      }
+    ],
+    "debuggers": [
+      {
+        "label": "Python Debug",
+        "type": "python",
+        "initialConfigurations": [
+          {
+            "type": "python",
+            "request": "launch",
+            "name": "Python: Current File",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true
+          }
+        ]
       }
     ]
   },
@@ -75,13 +123,16 @@
     "webpack-cli": "^5.0.2"
   },
   "dependencies": {
+    "@vscode/debugprotocol": "^1.63.0",
     "@vscode/ripgrep": "^1.15.3",
     "@vscode/vsce": "^2.19.0",
     "axios": "^1.4.0",
     "node-fetch": "^3.3.1",
     "vscode-debugadapter": "^1.51.0",
     "vscode-debugprotocol": "^1.51.0",
-    "vscode-ripgrep": "^1.13.2"
+    "vscode-languageclient": "^8.1.0",
+    "vscode-ripgrep": "^1.13.2",
+    "yarn": "^1.22.19"
   },
   "extensionDependencies": [
     "ms-python.python"
