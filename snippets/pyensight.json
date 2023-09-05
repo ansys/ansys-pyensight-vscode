@@ -1,0 +1,56 @@
+{
+    "locallauncher": {
+        "scope": "python",
+        "prefix": ["LocalLauncher", "locallauncher"],
+        "body": [
+            "from ansys.pyensight.core import LocalLauncher",
+            "launcher = LocalLauncher()",
+            "session = launcher.start()"
+        ]
+    },
+    "dockerlauncher": {
+        "scope": "python",
+        "prefix": ["DockerLauncher", "dockerlauncher"],
+        "body": [
+            "from ansys.pyensight.core import DockerLauncher",
+            "launcher = DockerLauncher(data_directory='D:\\\\')",
+            "launcher.pull()",
+            "session = launcher.start()"
+        ]
+    },
+    "enscontext": {
+        "scope": "python",
+        "prefix": ["EnsContext", "enscontext"],
+        "body": "from ansys.pyensight.core.enscontext import EnsContext"
+    },
+    "loaddata_fluent":{
+        "scope": "python",
+        "prefix": ["load_data"],
+        "body": "session.load_data(data_file='/path/to/dataset.cas.h5', result_file='/path/to/dataset.dat.h5')"
+    },
+    "loaddata_encas":{
+        "scope": "python",
+        "prefix": ["load_data"],
+        "body": "session.load_data(data_file='/path/to/dataset.encas')"
+    },
+    "export_img":{
+        "scope": "python",
+        "prefix": ["export", "image"],
+        "body": ["export = session.ensight.utils.export", "export.image('export.png')"]
+    },
+    "export_anim":{
+        "scope": "python",
+        "prefix": ["export", "animation"],
+        "body": ["export = session.ensight.utils.export", "export.animation('export.mp4')"]
+    },
+    "query_distance": {
+        "scope": "python",
+        "prefix": ["query", "plot"],
+        "body": ["query = session.ensight.utils.query", "query.create_distance('myquery', query.DISTANCE_PART1D, ['partName'], 'velocity', new_plotter=True)"]
+    },
+    "query_temporal": {
+        "scope": "python",
+        "prefix": ["query", "plot"],
+        "body": ["query = session.ensight.utils.query", "query.create_temporal('myquery', query.TEMPORAL_XYZ, ['partName'], 'velocity', xyz=[0.1, 0.2, 0.3], new_plotter=True)"]
+    }
+}
