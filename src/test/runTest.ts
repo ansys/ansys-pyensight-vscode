@@ -1,6 +1,6 @@
 import * as path from 'path';
-import * as cp from 'child_process'
-const packageJson = require('../../package.json')
+import * as cp from 'child_process';
+const packageJson = require('../../package.json');
 import { runTests, downloadAndUnzipVSCode, resolveCliArgsFromVSCodeExecutablePath } from '@vscode/test-electron';
 
 async function main() {
@@ -12,8 +12,8 @@ async function main() {
 		// The path to test runner
 		// Passed to --extensionTestsPath
 		const extensionTestsPath = path.resolve(__dirname, './suite/index');
-		const vscodeExecutablePath = await downloadAndUnzipVSCode()
-        const [cli, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath)
+		const vscodeExecutablePath = await downloadAndUnzipVSCode();
+        const [cli, ...args] = resolveCliArgsFromVSCodeExecutablePath(vscodeExecutablePath);
 
         if (packageJson.extensionDependencies) {
             for (const extensionId of packageJson.extensionDependencies) {

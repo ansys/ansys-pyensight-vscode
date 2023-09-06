@@ -1,11 +1,11 @@
 /// <reference path="extension.ts" />
 import * as vscode from 'vscode';
-import { DebugProtocol } from 'vscode-debugprotocol';
+import { DebugProtocol } from '@vscode/debugprotocol';
 import { PyEnSightWebPanel } from "./webpanel";
-import * as fetch from "node-fetch";
+//import * as fetch from "node-fetch";
+import * as axios from 'axios';
 
 
-const utilsNames = ["views", "export", "parts", "support", "query"];
 class MySessionItems implements vscode.QuickPickItem{
     label: string;
     name: string;
@@ -220,7 +220,8 @@ export class PyEnSightHover implements vscode.HoverProvider{
     }
 
     private async checkURL(url: string){
-        const response = fetch.default(new URL(url));
+        const response = await axios.default(url);
+        //const response = fetch.default(new URL(url));
         return (await response).status;
     }
 
