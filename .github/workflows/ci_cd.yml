@@ -68,8 +68,7 @@ jobs:
     - run: npm ci
     - run: npm run build --if-present
     - run: |
-        echo $OSTYPE
-        if [ "$OSTYPE" == "linux" ]; then
+        if [ "$OSTYPE" == "linux" || "$OSTYPE" == "linux-gnu"]; then
           export DISPLAY=:99
         fi
         npm test
