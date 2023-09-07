@@ -60,15 +60,22 @@ jobs:
         cache: 'npm'
     - run: npm ci
     - run: npm run build --if-present
-    - name: Run Tests
+    - name: Run Tests Linux
+      if: matrix.os == 'ubuntu-latest'
       shell: bash
       run: |
-        if [ "$OSTYPE" == "linux" ] || [ "$OSTYPE" == "linux-gnu" ]; then
-          /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
-          echo ">>> Started xvfb"
-          export DISPLAY=:99
-        fi
+        /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        echo ">>> Started xvfb"
+        export DISPLAY=:99
         export NODEPYTHONINTERP=$(which python)
         echo $NODEPYTHONINTERP
         echo $DISPLAY
+        npm test
+    - name: Run Tests Windows
+      if: matrix.os == 'windows-latest'
+      shell: cmd
+      run: |
+        $pythonval = where.exe python.exe
+        Set-Item -Path Env:NODEPYTHONINTERP -Value ("$pythonval")
+        write-host $pythonval
         npm test
