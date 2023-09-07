@@ -80,6 +80,7 @@ jobs:
   build:
     name: Nightly build
     runs-on: ubuntu-latest
+    needs: test
     steps:
     - name: Use Node.js 16.x
       uses: actions/setup-node@v3
