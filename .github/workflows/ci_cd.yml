@@ -73,7 +73,7 @@ jobs:
         npm test
     - name: Run Tests Windows
       if: matrix.os == 'windows-latest'
-      shell: cmd
+      shell: pwsh
       run: |
         $pythonval = where.exe python.exe
         Set-Item -Path Env:NODEPYTHONINTERP -Value ("$pythonval")
