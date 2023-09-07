@@ -3,7 +3,10 @@
   "publisher": "ansys",
   "displayName": "PyEnSight",
   "description": "A VS Code extension to write and debug EnSight Scripts",
+  "repository": {"url": "https://github.com/ansys-internal/ansys-pyensight-vscode", "type": "git"},
   "version": "0.1.0",
+  "license": "MIT",
+  "homepage": "https://github.com/ansys-internal/ansys-pyensight-vscode",
   "engines": {
     "vscode": "^1.78.0"
   },

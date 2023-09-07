@@ -1,16 +1,13 @@
 # This workflow will do a clean installation of node dependencies, cache/restore them, build the source code and run tests across different versions of node
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-nodejs
 
-name: GitHub CI
+name: Nightly Build
 
 on:
+  schedule:  # UTC at 0300 - 11pm EDT
+    - cron:  '0 3 * * *'
   workflow_dispatch:
-  pull_request:
-  push:
-    tags:
-      - "*"
-    branches:
-      - main
+
 env:
   PYENSIGHT_PACKAGE_NAMESPACE: 'ansys.pyensight.core'
   PYENSIGHT_PYPI: 'ansys-pyensight-core'
@@ -22,7 +19,7 @@ concurrency:
 
 jobs:
   test:
-
+    name: Nightly testing
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -94,8 +91,3 @@ jobs:
       shell: bash
       run: |
         vsce package
-    - name: Publish build
-      if: matrix.should_release == true
-      shell: bash
-      run: |
-        vsce publish
