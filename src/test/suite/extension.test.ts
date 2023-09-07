@@ -20,7 +20,7 @@ async function prepareData(){
 	await vscode.extensions.getExtension("ms-python.python")?.activate();
 	await vscode.extensions.getExtension("ms-python.pylance")?.activate();
 	await vscode.extensions.getExtension("ansys.pyensight")?.activate();
-	await setTimeout(30000);
+	await setTimeout(40000);
 	await vscode.commands.executeCommand(
 		"vscode.executeDefinitionProvider", 
 		exampleDoc.uri, 
