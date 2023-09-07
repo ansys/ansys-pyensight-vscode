@@ -69,5 +69,6 @@ jobs:
           export DISPLAY=:99
         fi
         export NODEPYTHONINTERP=$(which python)
+        echo $NODEPYTHONINTERP
         echo $DISPLAY
         npm test
