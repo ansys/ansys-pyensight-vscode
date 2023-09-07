@@ -91,4 +91,4 @@ jobs:
     - name: Build extension
       shell: bash
       run: |
-        vsce package
+       npx vsce package

@@ -96,9 +96,9 @@ jobs:
     - name: Build extension
       shell: bash
       run: |
-        vsce package
+        npx vsce package
     - name: Publish build
       if: matrix.should_release == true
       shell: bash
       run: |
-        vsce publish
+        npx vsce publish
