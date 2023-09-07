@@ -3,7 +3,6 @@
 import { PythonPyEnSightAugmenter, PyEnSightWebView, PyEnSightHover } from "./python_augmenter";
 
 
-import process = require('process');
 import * as vscode from 'vscode';
 
 declare global {
@@ -120,7 +119,7 @@ export async function activate(context: vscode.ExtensionContext) {
 
 		vscode.languages.registerHoverProvider('python', new PyEnSightHover());
 		
-
+		return context;
 
 }
 		// This method is called when your extension is deactivated

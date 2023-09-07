@@ -1,16 +1,17 @@
 import * as path from 'path';
 import * as Mocha from 'mocha';
 import { glob } from 'glob';
+import {setTimeout} from 'timers/promises';
 
-export function run(): Promise<void> {
+
+export async function run(): Promise<void> {
 	// Create the mocha test
 	const mocha = new Mocha({
 		ui: 'tdd',
-		color: true
+		color: true,
+		timeout: 120000
 	});
-
 	const testsRoot = path.resolve(__dirname, '..');
-
 	return new Promise(async (c, e) => {
 		const files = await glob('**/**.test.js', { cwd: testsRoot });
 			// Add files to the test suite

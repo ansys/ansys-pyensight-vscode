@@ -68,5 +68,6 @@ jobs:
           echo ">>> Started xvfb"
           export DISPLAY=:99
         fi
+        export NODEPYTHONINTERP=$(which python)
         echo $DISPLAY
         npm test

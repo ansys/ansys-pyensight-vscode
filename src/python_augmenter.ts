@@ -2,8 +2,8 @@
 import * as vscode from 'vscode';
 import { DebugProtocol } from '@vscode/debugprotocol';
 import { PyEnSightWebPanel } from "./webpanel";
-//import * as fetch from "node-fetch";
 import * as axios from 'axios';
+
 
 
 class MySessionItems implements vscode.QuickPickItem{
@@ -220,9 +220,12 @@ export class PyEnSightHover implements vscode.HoverProvider{
     }
 
     private async checkURL(url: string){
-        const response = await axios.default(url);
-        //const response = fetch.default(new URL(url));
-        return (await response).status;
+        try{
+            const response = await axios.default(url);
+            return response.status;
+        }catch (error){
+            return -1;
+        }        
     }
 
     private async buildURL(
@@ -323,9 +326,6 @@ export class PyEnSightHover implements vscode.HoverProvider{
                 if (character < 0){
                     character = document.lineAt(newPosition.line).range.end.character;
                 }
-                const word = document.getText(document.getWordRangeAtPosition(
-                    new vscode.Position(newPosition.line, character)
-                ));
                 value =  await vscode.commands.executeCommand(
                     "vscode.executeDefinitionProvider", 
                     document.uri, 
