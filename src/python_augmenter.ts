@@ -1,3 +1,17 @@
+
+/**
+ * python_augmenter.ts
+ * 
+ * The module contains the implementations of the PyEnSightWebView, PythonPyEnSightAugmenter
+ * and PyEnSightHover classes used to augment the standard Python debug capabilities.
+ * 
+ * PyEnSightWebView launches a WebView to display a Renderable for the selected PyEnSight session.
+ * PythonPyEnSightAugmenter augments the standard Python Debug capabilities to launch a PyEnSightWebView.
+ * PyEnSightHover provides new Hover objects in the VSCode editor, with links to the PyEnSight documentation.
+ * 
+ * 
+ */
+
 /// <reference path="extension.ts" />
 import * as vscode from 'vscode';
 import { DebugProtocol } from '@vscode/debugprotocol';
@@ -5,8 +19,14 @@ import { PyEnSightWebPanel } from "./webpanel";
 import * as axios from 'axios';
 
 
-
 class MySessionItems implements vscode.QuickPickItem{
+    /**
+     * MySessionItems is an implementation of QuickPickItem designed to display
+     * in a nice layout the PyEnSight Session objects to be selected.
+     * 
+     * @param name The name of the Session instance
+     * @param label The representation of the Session in the quick pick item menu
+     */
     label: string;
     name: string;
     constructor(name: string) {
@@ -15,6 +35,13 @@ class MySessionItems implements vscode.QuickPickItem{
     }
 }
 class RenderItem implements vscode.QuickPickItem{
+    /**
+     * RenderItem is an implementation of QuickPickItem designed to display
+     * in a nice layout the PyEnSight Renderable objects to be selected.
+     * 
+     * @param label The name of the Renderable
+     * @param description The representation of the Renderable in the quick pick item menu
+     */
     label: string;
     description: string;
     constructor(label: string, description: string){
@@ -36,6 +63,15 @@ renderItems.push(new RenderItem("webensight", "A VNC stream of the current EnSig
 
 
 export class PyEnSightWebView {
+    /**
+     * PyEnSightWebView is a class that launches a WebView to be display a PyEnSight
+     * Renderable instance from a PyEnSight session. It uses the PyEnSightWebPanel class to 
+     * launch the WebView, while in the following code it looks for the existing PyEnSight session
+     * instances and asks for the kind of Renderable to be displayed.
+     * 
+     * @param context The vscode Extension context
+     * @param session The vscode Debug session
+     */
     private _sessionSelected: any;
     protected _context: vscode.ExtensionContext;
     protected _uri: vscode.Uri;
@@ -50,6 +86,13 @@ export class PyEnSightWebView {
     };
 
     async createResponse(variable: any){
+        /**
+         * The function generates a response using the VSCode DAP API to inspect the input variable
+         * for an existing url to be used for displaying the renderable in the webView.
+         * 
+         * @param variable the variable holding the session instance for which a Renderable will be 
+         * displayed in the WebView
+         */
         const expression = `${variable.name}.show("${this._input!.label}")._url`;
         const responseFrameId = await this._debugSession.customRequest('stackTrace', { threadId: 1 });
         const frameId = await responseFrameId.stackFrames[0].id;
@@ -70,6 +113,12 @@ export class PyEnSightWebView {
     }
 
     protected async selectRenderable(condition: boolean){
+        /**
+         * The function creates the QuickPickItem menu to select the renderable
+         * to be displayed in the WebView/
+         * 
+         * @param condition a condition to be checked before creating the menu
+         */
 
         if (condition){
             const options: vscode.QuickPickOptions = {
@@ -91,6 +140,11 @@ export class PyEnSightWebView {
     }
 
     protected async findSession(scopes: any){
+        /**
+         * The function inspects the current debug stack frame for PyEnSight Session instances.
+         * 
+         * @param scopes the debug scopes returned by the VSCode DAP API
+         */
         for (let scope of scopes)
         {
             if (scope.name === "Locals")
@@ -145,6 +199,9 @@ export class PyEnSightWebView {
     }
 
     public async launchWebView(){
+        /**
+         * Launch the PyEnSight WebView Instance
+         */
         if (this._input === undefined){
             await this.selectRenderable(true);
         }
@@ -164,17 +221,35 @@ export class PyEnSightWebView {
     } 
 
 export class PythonPyEnSightAugmenter extends PyEnSightWebView implements vscode.DebugAdapterTracker {
+    /**
+     * The class implements a Debug Adapter that augments the existing Python debugger capabilities to 
+     * inject a PyEnSight WebView instance.
+     * 
+     * @param context The vscode Extension context
+     * @param session The vscode Debug session
+     */
     
     constructor(context: vscode.ExtensionContext, session: vscode.DebugSession){
         super(context, session);
     };
     
     async onWillStartSession(){
+        /**
+         * This function is triggered when the PyEnSight Debug Session is started.
+         * A renderable selection is prompted to the user
+         */
         await this.selectRenderable(pyensightDebug.called === true && this._input === undefined);
     }
     
 
     async onDidSendMessage(message: DebugProtocol.ProtocolMessage) {
+        /**
+         * The function is triggered on every event happening during the debug session.
+         * The only event used here is the "stopped" event, that happens when the debug session
+         * has stopped at a breakpoint. When this happens, a WebView instance launch is attempted.
+         * 
+         * @param message The debug Protol message coming from the VSCode DAP API
+         */
         if (pyensightDebug.called === true){
             if (message.type === 'event') {
 		        const event = message as DebugProtocol.Event;
@@ -188,6 +263,10 @@ export class PythonPyEnSightAugmenter extends PyEnSightWebView implements vscode
     }
 
     onWillStopSession() {
+        /**
+         * The function is triggered when a debug session is stopped.
+         * The global variables are reset and the WebView is disposed.
+         */
        pyensightDebug.called = false;
        augmenter = undefined;
        PyEnSightWebPanel.currentPanel?.dispose();
@@ -197,11 +276,24 @@ export class PythonPyEnSightAugmenter extends PyEnSightWebView implements vscode
 
 
 export class PyEnSightHover implements vscode.HoverProvider{
+    /**
+     * The PyEnSightHover class is an implementation of HoverProvider.
+     * The aim is to supply an additional link on the PyEnSight objects hovered that
+     * remands to the PyEnSight documentation.
+     */
+
     private baseURL = "https://ensight.docs.pyansys.com/version/stable/_autosummary/";
 
-    private async buildStandard(kind: string, uri: string, _uri: vscode.Location){
-        const doc = vscode.workspace.openTextDocument(uri);
-        const word = (await doc).getText(_uri.range);
+    private async buildStandard(kind: string, filename: string, uri: vscode.Location){
+        /**
+         * Create a URL link for objects that have a common link structure.
+         * 
+         * @param kind the kind of PyEnSight object to be looked for
+         * @param filename the filename that provides the object definition
+         * @param uri the uri of the filename that provides the object definition
+         */
+        const doc = vscode.workspace.openTextDocument(filename);
+        const word = (await doc).getText(uri.range);
         let base: string;
         base = `https://ensight.docs.pyansys.com/version/stable/_autosummary/ansys.pyensight.core.${kind}.${word}.html`;
         let val: string;
@@ -220,6 +312,11 @@ export class PyEnSightHover implements vscode.HoverProvider{
     }
 
     private async checkURL(url: string){
+        /**
+         * Check if the input URL is a valid URL via http request
+         * 
+         * @param url the url to check
+         */
         try{
             const response = await axios.default(url);
             return response.status;
@@ -233,6 +330,13 @@ export class PyEnSightHover implements vscode.HoverProvider{
         document: vscode.TextDocument, 
         position: vscode.Position,
     ){
+        /**
+         * The main function that builds the URL to be displayed during the Hovering.
+         * 
+         * @param _uri the uri of the filename that provides the definition of the object hovered
+         * @document the instance of the current document open in the editor
+         * @position the hover position in the document
+         */
         const uri = _uri.uri.path;
         const ansys = uri.includes("ansys");
         const api = uri.includes("api/pyensight");
@@ -313,7 +417,9 @@ export class PyEnSightHover implements vscode.HoverProvider{
     }
 
     async provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Hover | null | undefined >{
-
+        /**
+         * The function is triggered when an object is hovered, returning a new hover value.
+         */
         let value: vscode.Location[] = await vscode.commands.executeCommand(
             "vscode.executeDefinitionProvider", 
             document.uri, 

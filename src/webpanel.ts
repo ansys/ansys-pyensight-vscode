@@ -1,6 +1,19 @@
+
+/**
+ * webpanel.ts
+ * 
+ * Based on the webview sample provided on https://github.com/microsoft/vscode-extension-samples/blob/main/webview-sample/src/extension.ts
+ * 
+ * The module provides the class PyEnSight WebView, which generates and manages a WebView to display
+ * a Renderable for a selected PyEnSight Session.
+ */
+
 import * as vscode from 'vscode';
 
 function getWebviewOptions(): vscode.WebviewOptions {
+	/** 
+	 * Return the WebView options.
+	 */
 	return {
 		// Enable javascript in the webview
 		enableScripts: true,
@@ -9,8 +22,17 @@ function getWebviewOptions(): vscode.WebviewOptions {
 
 export class PyEnSightWebPanel {
 	/**
-	 * Track the currently panel. Only allow a single panel to exist at a time.
+	 * The class launches and manages a WebView to display a Renderable of the current
+	 * PyEnSight session.
+	 * 
+     * 
+	 * @param panel The panel to set as current panel
+	 * @param extensionUri The URI of the extension asking to set the panel
+	 * @param url the URL to use in the panel HTML
+	 * 
 	 */
+
+	//Track the current panel. Only allow a single panel to exist at a time.
 	public static currentPanel: PyEnSightWebPanel | undefined;
 
 	public static readonly viewType = 'PyEnSightDebug';
@@ -21,11 +43,17 @@ export class PyEnSightWebPanel {
 	private _disposables: vscode.Disposable[] = [];
 
 	public updateUrl(url: string)
+	/**
+	 * Set the input URL as the new URL to be used in the iframe
+	 */
 	{
 		this._url = url;
 	}
 
 	public static createOrShow(extensionUri: vscode.Uri, url: string) {
+		/**
+		 * Create a new webview panel or show the already available one
+		 */
 		const column = vscode.window.activeTextEditor
 			? vscode.ViewColumn.Two
 			: undefined;
@@ -47,6 +75,14 @@ export class PyEnSightWebPanel {
 	}
 
 	public static revive(panel: vscode.WebviewPanel, extensionUri: vscode.Uri, url: string) {
+		/**
+		 * Update the current panel with a new one and a new URL
+		 * 
+		 * @param panel The panel to set as current panel
+		 * @param extensionUri The URI of the extension asking to set the panel
+		 * @param url the URL to use in the panel HTML
+		 * 
+		 */
 		PyEnSightWebPanel.currentPanel = new PyEnSightWebPanel(panel, extensionUri, url);
 	}
 
@@ -88,12 +124,18 @@ export class PyEnSightWebPanel {
 	}
 
 	public doRefactor() {
-		// Send a message to the webview webview.
-		// You can send any JSON serializable data.
+		/**
+		 * Send a message to the webview webview.
+		 * You can send any JSON serializable data.
+		 */ 
 		this._panel.webview.postMessage({ command: 'refactor' });
 	}
 
 	public dispose() {
+		/**
+		 * Dispose the current panel
+		 */
+
 		PyEnSightWebPanel.currentPanel = undefined;
 
 		// Clean up our resources
@@ -108,6 +150,13 @@ export class PyEnSightWebPanel {
 	}
 
 	private _update(url: string | undefined) {
+		/**
+		 * Update the current panel with a new URL and produce the new HTML
+		 * code to be displaued
+		 * 
+		 * @param url the URL to set
+		 * 
+		 */
 		const webview = this._panel.webview;
 		if (url){
 			this.updateUrl(url);
@@ -118,12 +167,20 @@ export class PyEnSightWebPanel {
 	}
 
 	private async _updateHTML(webview: vscode.Webview) {
+		/**
+		 * Update the HTML to be displayed in the webView
+		 * 
+		 * @param webview The current webView instance
+		 */
 		webview.asWebviewUri;
-		this._panel.webview.html = await this._getHtmlForWebview(webview) as string;
+		this._panel.webview.html = await this._getHtmlForWebview() as string;
 	}
 
-	private async _getHtmlForWebview(webview: vscode.Webview) {
-		// Use a nonce to only allow specific scripts to be run
+	private async _getHtmlForWebview() {
+		/**
+		 * Create the HTML code for the current webView
+		 * 
+		 */
 		var _html: string;
 		_html = `<!DOCTYPE html>
 		<html lang="en">
