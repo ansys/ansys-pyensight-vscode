@@ -82,7 +82,11 @@ mocha.describe('Extension Test Suite', () => {
 			{
 			    "command": "pyensight.apidocs",
 				"title": "PyEnSight: Open the EnSight Python API documentation"
-			}
+			},
+			{
+				"command": "pyensight.cheatsheet",
+				"title": "PyEnSight: Open the PyEnSight CheatSheet"
+			  }
 		];
 				extension?.activate();
 				assert.deepEqual(extension?.packageJSON.contributes.commands, expected);

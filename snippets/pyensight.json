@@ -13,7 +13,7 @@
         "prefix": ["DockerLauncher", "dockerlauncher"],
         "body": [
             "from ansys.pyensight.core import DockerLauncher",
-            "launcher = DockerLauncher(data_directory='D:\\\\')",
+            "launcher = DockerLauncher(data_directory='D:\\\\\\\\')",
             "launcher.pull()",
             "session = launcher.start()"
         ]

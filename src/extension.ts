@@ -135,6 +135,14 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	));
 
+	context.subscriptions.push(vscode.commands.registerCommand('pyensight.cheatsheet', async () => 
+	{
+		const docUrl = "https://cheatsheets.docs.pyansys.com/pyensight_cheat_sheet.pdf";
+		vscode.window.showInformationMessage("Opening the PyEnSight CheatSheet.");
+		vscode.env.openExternal(vscode.Uri.parse(docUrl));
+	}
+));
+
 		/**
 		 * pyensight.webview command
 		 * 
