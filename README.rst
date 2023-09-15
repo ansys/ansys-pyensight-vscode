@@ -30,7 +30,7 @@ PyEnSight Visual Studio Code Extension
 =============================================
 PyEnSight extension for Visual Studio Code
 =============================================
-A VSCODE_ exteision_ which supports the PyEnSight_ PyAnsys module with Renderable embedding, augmented
+A VSCODE_ extension_ which supports the PyEnSight_ PyAnsys module with Renderable embedding, augmented
 hover links and snippets for empowering the writing and debugging of PyEnSight scripts.
 
 
