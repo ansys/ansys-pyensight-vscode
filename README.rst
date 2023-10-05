@@ -39,7 +39,7 @@ Quick start
 
 * Install a PyEnSight_ supported version on your system.
 * Install the PyEnSight extension for Visual Studio Code as described here: `Install VSCode Extension`_.
-* If not set, set a default Python intepreter in VSCode using the command palette Python: Set Interpreter.
+* If not set, set a default Python interpreter in VSCode using the command palette Python: Set Interpreter.
 
 Features
 ---------
@@ -60,7 +60,7 @@ The user will be asked to choose a Renderable to be chosen with the following op
 * animation: A transient animation of the current dataset and status in EnSight;
 * webgl: An embedded AVZ viewer showing the current status of EnSight exported in AVZ;
 * remote: A VNC stream of the current EnSight rendering window with a simple webUI;
-* remote_scene: A VNC stream to an EnVision instance showing the curren status of EnSight exported as a scenario;
+* remote_scene: A VNC stream to an EnVision instance showing the current status of EnSight exported as a scenario;
 * webensight: (beta feature) A VNC stream of the current EnSight rendering window with a full webUI;
 
 .. image:: images/pyensightremote.gif
@@ -85,7 +85,7 @@ Other commands
 
 * PyEnSight: Open the PyEnSight documentation. The default browser is launched to display the PyEnSight documentation.
 * PyEnSight: Open the EnSight Python API documentation. The default browser is launched to display the EnSight Python API documentation.
-* PyEnSight: Help. A info window is displayed with the main PyEnSight extension features. Useful for checking the correct installation of the extension.
+* PyEnSight: Help. An info window is displayed with the main PyEnSight extension features. Useful for checking the correct installation of the extension.
 * PyEnSight: Install PyEnSight. The extension will detect the current selected Python interpreter and install PyEnSight. So make sure to use the correct interpreter.
 
 Hovering
