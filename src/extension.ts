@@ -1,14 +1,14 @@
 /**
  * extension.ts
  * 
- * The module manages the activation and deactivation of the PyEnSight VS Code extension.
+ * The module manages the activation and deactivation of the PyEnSight VSCode extension.
  * On activation, the specific commands and debug provider are registered.
  * 
  * 
  */
 
 
-// The module 'vscode' contains the VS Code extensibility API
+// The module 'vscode' contains the VSCode extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import { PythonPyEnSightAugmenter, PyEnSightWebView, PyEnSightHover } from "./python_augmenter";
 
