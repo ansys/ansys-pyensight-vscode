@@ -17,9 +17,9 @@ PyEnSight Visual Studio Code Extension
 
 .. _PyEnSight: https://ensight.docs.pyansys.com/version/stable/
 
-.. _MIT: https://github.com/lextudio/vscode-restructuredtext-pack/blob/master/LICENSE.txt
+.. _MIT: https://github.com/ansys-internal/ansys-pyensight-vscode/blob/main/LICENSE
 
-.. _VSCODE: https://code.visualstudio.com/
+.. _VSCode: https://code.visualstudio.com/
 
 .. _extension: https://marketplace.visualstudio.com/VSCode
 
@@ -30,7 +30,7 @@ PyEnSight Visual Studio Code Extension
 =============================================
 PyEnSight extension for Visual Studio Code
 =============================================
-A VSCODE_ extension_ which supports the PyEnSight_ PyAnsys module with Renderable embedding, augmented
+A VSCode_ extension_ which supports the PyEnSight_ PyAnsys module with Renderable embedding, augmented
 hover links and snippets for empowering the writing and debugging of PyEnSight scripts.
 
 
