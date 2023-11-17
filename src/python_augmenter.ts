@@ -407,7 +407,25 @@ export class PyEnSightHover implements vscode.HoverProvider{
                 const doc = vscode.workspace.openTextDocument(uri);
                 const word = (await doc).getText(_uri.range);
                 const base = `${this.baseURL}${adjusted}.${word.toUpperCase()}.html`;
-                return `${base}#${adjusted}.${word}`;
+                let newUrl = `${base}#${adjusted}.${word}`;
+                if(await this.checkURL(newUrl) !== 200){
+                    const base = `${this.baseURL}${adjusted}.${word}.html`;
+                    newUrl = `${base}#${adjusted}.${word}`;
+                    if (await this.checkURL(newUrl) === 200){
+                        return newUrl;
+                    }
+                    else{
+                        const alternative = `${this.baseURL}${adjusted}.html`;
+                        if (await this.checkURL(alternative) === 200){
+                            return alternative;
+                        }
+                        return;
+                    }
+                }
+                else{
+                    return newUrl;
+                }
+                return;
             }
             if (await this.checkURL(val) === 200){
                 return val;
