@@ -93,3 +93,6 @@ ctx.load( "init_state.ctxz")
 session.restore_context(ctx)
 print("complete!")
 
+idx = session.ensight.objs.enums.PART_PARTICLE_TRACE
+def_part = session.ensight.objs.core.DEFAULTPARTS[idx]
+newpart = def_part.createpart(sources=parts.select_parts_by_dimension(3), name="test")[0]
