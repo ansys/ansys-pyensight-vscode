@@ -122,6 +122,9 @@ mocha.describe('Extension Test Suite', () => {
 		x = await executeHoverProvider(exampleDoc, 54, 36);
 		val = x[1].contents[0] as vscode.MarkdownString;
 		checkResult(val, "https://ensight.docs.pyansys.com/version/stable/_autosummary/ansys.pyensight.core.utils.parts.Parts.html");
+		x = await executeHoverProvider(exampleDoc, 97, 22);
+		val = x[1].contents[0] as vscode.MarkdownString;
+		checkResult(val, "https://ensight.docs.pyansys.com/version/stable/_autosummary/ansys.api.pyensight.ens_part.ENS_PART.createpart.html#ansys.api.pyensight.ens_part.ENS_PART.createpart");
 
 	});
 	

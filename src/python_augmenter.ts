@@ -342,6 +342,7 @@ export class PyEnSightHover implements vscode.HoverProvider{
         const api = uri.includes("api/pyensight");
         const core = uri.includes("pyensight/core");
         const ens = uri.includes("pyensight/ens_");
+        let alternativeVal = null;
         if (ansys === false){
             return;
         }
@@ -407,10 +408,17 @@ export class PyEnSightHover implements vscode.HoverProvider{
                 const doc = vscode.workspace.openTextDocument(uri);
                 const word = (await doc).getText(_uri.range);
                 const base = `${this.baseURL}${adjusted}.${word.toUpperCase()}.html`;
-                return `${base}#${adjusted}.${word}`;
+                val = `${base}#${adjusted}.${word}`;
+                const alternativeBase = `${this.baseURL}${adjusted}.${word}.html`;
+                alternativeVal = `${alternativeBase}#${adjusted}.${word}`;
             }
             if (await this.checkURL(val) === 200){
                 return val;
+            }
+            if (alternativeVal !== null){
+                if (await this.checkURL(alternativeVal) === 200){
+                    return alternativeVal;
+                }
             }
             return;
         }
