@@ -342,7 +342,7 @@ export class PyEnSightHover implements vscode.HoverProvider{
         const api = uri.includes("api/pyensight");
         const core = uri.includes("pyensight/core");
         const ens = uri.includes("pyensight/ens_");
-        let alternativeVal = undefined;
+        let alternativeVal = null;
         if (ansys === false){
             return;
         }
@@ -415,7 +415,7 @@ export class PyEnSightHover implements vscode.HoverProvider{
             if (await this.checkURL(val) === 200){
                 return val;
             }
-            if (alternativeVal !== undefined){
+            if (alternativeVal){
                 if (await this.checkURL(alternativeVal) === 200){
                     return alternativeVal;
                 }
