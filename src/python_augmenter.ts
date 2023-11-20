@@ -415,7 +415,7 @@ export class PyEnSightHover implements vscode.HoverProvider{
             if (await this.checkURL(val) === 200){
                 return val;
             }
-            if (alternativeVal){
+            if (alternativeVal !== null){
                 if (await this.checkURL(alternativeVal) === 200){
                     return alternativeVal;
                 }
