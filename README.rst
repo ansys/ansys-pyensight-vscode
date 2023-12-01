@@ -51,7 +51,7 @@ Features
 * Launch a *PyEnsight WebView* during a Python debug session to select a specific session and the renderable to display.
 * Use supplied snippets to simplify the scripting experience.
 
-PyEnSight Debug Session and Webview
+PyEnSight Debug Session and WebView
 ------------------------------------
 
 You can launch a PyEnSight debug session using **PyEnSight: Launch Debug Session** on the command palette.
@@ -63,7 +63,7 @@ You are then asked to select a renderable from the following options:
 * **webgl**: An embedded AVZ viewer showing the current status of EnSight exported in AVZ
 * **remote**: A VNC stream of the current EnSight rendering window with a simple web UI
 * **remote_scene**: A VNC stream to an EnVision instance showing the current status of EnSight exported as a scenario
-* **webensight** (beta feature): A VNC stream of the current EnSight rendering window with a full webUI
+* **webensight** (beta feature): A VNC stream of the current EnSight rendering window with a full web UI
 
 .. image:: images/pyensightremote.gif
    :width: 600
