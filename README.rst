@@ -48,7 +48,7 @@ Features
 
 * Hover over a string in Visusal Studio Code's text editor to see the link to the relevant PyEnsight documentation.
 * Launch a *PyEnSight debug session* to start a new Python debug session in which to select the session and renderable.
-* Launch a WebView during a Python debug session to select a specific session and the renderable to display.
+* Launch a *PyEnsight WebView* during a Python debug session to select a specific session and the renderable to display.
 * Use supplied snippets to simplify the scripting experience.
 
 PyEnSight Debug Session and Webview
@@ -68,7 +68,7 @@ You are then asked to select a renderable from the following options:
 .. image:: images/pyensightremote.gif
    :width: 600
 
-Making a renderable selection launches a standard Python debug session. At the first breakpoint where at least a 
+Selecting a renderable option launches a standard Python debug session. At the first breakpoint where at least a 
 PyEnSight object is available on the stack frame, you are asked which session to show. A panel
 displaying the selected renderable and session appears on the side. This panel also displays the
 current status of the postprocessing session. As you walk through the script, you can see the
