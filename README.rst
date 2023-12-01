@@ -47,8 +47,8 @@ Features
 ---------
 
 * Hover over a string in Visusal Studio Code's text editor to see the link to the relevant PyEnsight documentation.
-* Launch a WebView during a Python debug session to select a specific session and the renderable to display.
 * Launch a *PyEnSight debug session* to start a new Python debug session in which to select the session and renderable.
+* Launch a WebView during a Python debug session to select a specific session and the renderable to display.
 * Use supplied snippets to simplify the scripting experience.
 
 PyEnSight Debug Session and Webview
