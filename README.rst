@@ -30,9 +30,9 @@ PyEnSight Visual Studio Code Extension
 Overview
 ---------
 
-This `Visual Studio Code <VSCode_>`_ extension_ supports PyEnSight_, a PyAnsy library, providing
-renderable embedding, augmented hover links, and snippets that empower the writing and debugging
-of PyEnSight scripts.
+The PyEnsight Visual Studio Code Extension is a `Visual Studio Code <VSCode_>`_ extension_ that
+supports PyEnSight_, a PyAnsy library. This extension provides renderable embedding, augmented
+hover links, and snippets that empower the writing and debugging of PyEnSight scripts.
 
 Quick start
 ------------
@@ -57,13 +57,13 @@ PyEnSight Debug Session and Webview
 You can launch a PyEnSight debug session using **PyEnSight: Launch Debug Session** on the command palette.
 You are then asked to select a renderable from the following options:
 
-* ``image``: A picture of the current EnSight status
-* ``deep_pixel``: A deep-pixel picture of the current EnSight status
-* ``animation``: A transient animation of the current dataset and status in EnSight
-* ``webgl``: An embedded AVZ viewer showing the current status of EnSight exported in AVZ
-* ``remote``: A VNC stream of the current EnSight rendering window with a simple web UI
-* ``remote_scene``: A VNC stream to an EnVision instance showing the current status of EnSight exported as a scenario
-* ``webensight``(beta feature): A VNC stream of the current EnSight rendering window with a full webUI
+* **image**: A picture of the current EnSight status
+* **deep_pixel**: A deep-pixel picture of the current EnSight status
+* **animation**: A transient animation of the current dataset and status in EnSight
+* **webgl**: An embedded AVZ viewer showing the current status of EnSight exported in AVZ
+* **remote**: A VNC stream of the current EnSight rendering window with a simple web UI
+* **remote_scene**: A VNC stream to an EnVision instance showing the current status of EnSight exported as a scenario
+* **webensight** (beta feature): A VNC stream of the current EnSight rendering window with a full webUI
 
 .. image:: images/pyensightremote.gif
    :width: 600
