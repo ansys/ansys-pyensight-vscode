@@ -80,7 +80,7 @@ updated renderable so that you can follow what is happening in EnSight while deb
 Alternatively, you can launch the panel after a Python debug session has been started using **PyEnSight: Launch WebView**
 on the command palette. You should always use this command when a breakpoint is hit and at least a ``Session`` object is available.
 
-Both PyEnsight launch commands are also available as options when you right-click in Visusal Studio Code's text editor or
+Both PyEnsight launch commands are also available as options when you right-click in Visual Studio Code's text editor or
 select from the **Run** submenu on the top right of its UI.
 
 Other commands
@@ -91,12 +91,12 @@ Other commands
 * **PyEnSight: Help**: Opens an information window listing the main PyEnSight extension features and version. This command
   is useful for checking that you have the correct installation of the extension.
 * **PyEnSight: Install PyEnSight**: Detects the current selected Python interpreter and installs PyEnSight. Before using this
-  command, you want to ensure that you have set the correct interpreter.
+  command, you want to ensure that the correct interpreter is set.
 
 Hovering
 ---------
 
-Inside of the Visual Studio Code text editor, you can hover over any object to access the link to the PyEnSight documentation
+Inside of Visual Studio Code's text editor, you can hover over any object to access the link to the PyEnSight documentation
 that describes this object.
 
 .. image:: images/hover.gif
