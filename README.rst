@@ -27,76 +27,80 @@ PyEnSight Visual Studio Code Extension
 
 .. _Install VSCode Extension: https://code.visualstudio.com/docs/editor/extension-marketplace
 
-=============================================
-PyEnSight extension for Visual Studio Code
-=============================================
-A VSCode_ extension_ which supports the PyEnSight_ PyAnsys module with Renderable embedding, augmented
-hover links and snippets for empowering the writing and debugging of PyEnSight scripts.
+Overview
+---------
 
+This `Visual Studio Code <VSCode_>`_ extension_ supports PyEnSight_, a PyAnsy library, providing
+renderable embedding, augmented hover links, and snippets that empower the writing and debugging
+of PyEnSight scripts.
 
 Quick start
 ------------
 
-* Install a PyEnSight_ supported version on your system.
-* Install the PyEnSight extension for Visual Studio Code as described here: `Install VSCode Extension`_.
-* If not set, set a default Python interpreter in VSCode using the command palette Python: Set Interpreter.
+* Install a PyEnSight-supported version on your system.
+* Install the PyEnSight Visual Studio Code Extension as described in `Extension Marketplace <Install VSCode Extension_>`_
+  in the Visual Studio Code documentation.
+* If a default Python interpreter is not set in Visual Studio Code, use **Python: Set Interpreter** on
+  the command palette to set one.
 
 Features
 ---------
 
-* String hovering in the text editor will show a link to the relevant PyEnSight_ documentation.
-* A WebView can be launched during a Python debug session to select a specific session and Renderable to be displayed.
-* Alternatively, users can launch a `PyEnSight Debug Session` that will launch a new Python debug session and let the user select the session and Renderable.
-* Useful snippets are available to simplify the scripting experience.
+* Hover over a string in Visusal Studio Code's text editor to see the link to the relevant PyEnsight documentation.
+* Launch a WebView during a Python debug session to select a specific session and the renderable to display.
+* Launch a *PyEnSight debug session* to start a new Python debug session in which to select the session and renderable.
+* Use supplied snippets to simplify the scripting experience.
 
-PyEnSight WebView and Debug Session
+PyEnSight Debug Session and Webview
 ------------------------------------
 
-A PyEnSight debug session can be launched using the command palette "PyEnSight: Launch Debug Session".
-The user will be asked to choose a Renderable to be chosen with the following options:
+You can launch a PyEnSight debug session using **PyEnSight: Launch Debug Session** on the command palette.
+You are then asked to select a renderable from the following options:
 
-* image: A picture of the current EnSight status;
-* deep_pixel: A deep pixel picture of the current EnSigth status;
-* animation: A transient animation of the current dataset and status in EnSight;
-* webgl: An embedded AVZ viewer showing the current status of EnSight exported in AVZ;
-* remote: A VNC stream of the current EnSight rendering window with a simple webUI;
-* remote_scene: A VNC stream to an EnVision instance showing the current status of EnSight exported as a scenario;
-* webensight: (beta feature) A VNC stream of the current EnSight rendering window with a full webUI;
+* ``image``: A picture of the current EnSight status
+* ``deep_pixel``: A deep-pixel picture of the current EnSight status
+* ``animation``: A transient animation of the current dataset and status in EnSight
+* ``webgl``: An embedded AVZ viewer showing the current status of EnSight exported in AVZ
+* ``remote``: A VNC stream of the current EnSight rendering window with a simple web UI
+* ``remote_scene``: A VNC stream to an EnVision instance showing the current status of EnSight exported as a scenario
+* ``webensight``(beta feature): A VNC stream of the current EnSight rendering window with a full webUI
 
 .. image:: images/pyensightremote.gif
    :width: 600
 
-Following this choice, a standard Python Debug Session is launched. At the first breakpoint where at least a 
-PyEnSight object is available on the stack frame, the user will be asked which Session to show. A panel
-displaying the selected Renderable and Session will come up on the side, displaying the current status of the post-processing session.
-Walking the script, the panel will get updated with the updated Renderable, so that the user can follow
-what is happening in EnSight while debugging the script.
+Making a renderable selection launches a standard Python debug session. At the first breakpoint where at least a 
+PyEnSight object is available on the stack frame, you are asked which session to show. A panel
+displaying the selected renderable and session appears on the side. This panel also displays the
+current status of the postprocessing session. As you walk through the script, you can see the
+updated renderable so that you can follow what is happening in EnSight while debugging the script.
 
 .. image:: images/pyensightsession.gif
    :width: 600
 
-Alternatively, the panel can be launched after a Python debug session has been started, using the command palette "PyEnSight: Launch WebView".
-The command should be always used when a breakpoint is hit and at least a Session object is available.
+Alternatively, you can launch the panel after a Python debug session has been started using **PyEnSight: Launch WebView**
+on the command palette. You should always use this command when a breakpoint is hit and at least a ``Session`` object is available.
 
-Both the commands are also available as option right clicking in the text editor, or in the run submenu on the top right of the VSCode UI.
+Both PyEnsight launch commands are also available as options when you right-click in Visusal Studio Code's text editor or
+select from the **Run** submenu on the top right of its UI.
 
 Other commands
 ---------------
 
-* PyEnSight: Open the PyEnSight documentation. The default browser is launched to display the PyEnSight documentation.
-* PyEnSight: Open the EnSight Python API documentation. The default browser is launched to display the EnSight Python API documentation.
-* PyEnSight: Help. An info window is displayed with the main PyEnSight extension features. Useful for checking the correct installation of the extension.
-* PyEnSight: Install PyEnSight. The extension will detect the current selected Python interpreter and install PyEnSight. So make sure to use the correct interpreter.
+* **PyEnSight: Open the PyEnSight documentation**: Launches the default browser to display the PyEnSight documentation.
+* **PyEnSight: Open the EnSight Python API documentation**: Launches the default browser to display the EnSight Python API documentation.
+* **PyEnSight: Help**: Opens an information window listing the main PyEnSight extension features and version. This command
+  is useful for checking that you have the correct installation of the extension.
+* **PyEnSight: Install PyEnSight**: Detects the current selected Python interpreter and installs PyEnSight. Before using this
+  command, you want to ensure that you have set the correct interpreter.
 
 Hovering
 ---------
 
-Inside of the VSCode text editor, hovering any object is now possible to access the PyEnSight documentation link describing the object being hovered.
+Inside of the Visual Studio Code text editor, you can hover over any object to access the link to the PyEnSight documentation
+that describes this object.
 
 .. image:: images/hover.gif
    :width: 600
-
-
 
 License
 ----------------------------
