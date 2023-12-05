@@ -27,6 +27,8 @@ PyEnSight Visual Studio Code Extension
 
 .. _Install VSCode Extension: https://code.visualstudio.com/docs/editor/extension-marketplace
 
+.. _EnVision: https://www.ansys.com/products/fluids/ansys-ensight/envision-viewer
+
 Overview
 ---------
 
@@ -49,7 +51,19 @@ Features
 * Hover over a string in Visusal Studio Code's text editor to see the link to the relevant PyEnsight documentation.
 * Launch a *PyEnSight debug session* to start a new Python debug session in which to select the session and renderable.
 * Launch a *PyEnsight WebView* during a Python debug session to select a specific session and the renderable to display.
-* Use supplied snippets to simplify the scripting experience.
+* Use supplied snippets to simplify the scripting experience. 
+  Just start typing any of the snippets and press tab on the highlighted one to get useful
+  code for your Python script..
+  Here is a brief list of the snippets currently available:
+
+   - *LocalLauncher / locallauncher* 
+   - *DockerLauncher / dockerlauncher*
+   - *EnSContext / enscontext*
+   - *load_data*
+   - *export / image*
+   - *export / animation*
+   - *query / plot*
+
 
 PyEnSight Debug Session and WebView
 ------------------------------------
@@ -62,7 +76,10 @@ You are then asked to select a renderable from the following options:
 * **animation**: A transient animation of the current dataset and status in EnSight
 * **webgl**: An embedded AVZ viewer showing the current status of EnSight exported in AVZ
 * **remote**: A VNC stream of the current EnSight rendering window with a simple web UI
-* **remote_scene**: A VNC stream to an EnVision instance showing the current status of EnSight exported as a scenario
+* **remote_scene**: A VNC stream to an EnVision_ instance showing the current status of EnSight exported as a scenario. 
+  EnVision_ is a lightweight EnSight_ Viewer that supports high-speed flipbooks, rendering and additional support to create high quality views of your models
+  exported in *scenario* format via EnSight_. It can be helpful when dealing with large transient simulations in order
+  to reduce the size for the analysis and improve the interactivity.
 * **webensight** (beta feature): A VNC stream of the current EnSight rendering window with a full web UI
 
 .. image:: images/pyensightremote.gif
