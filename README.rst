@@ -54,7 +54,7 @@ Features
 * Use supplied snippets to simplify the scripting experience. 
   Just start typing any of the snippets and press tab on the highlighted one to get useful
   code for your Python script..
-  Here is a brief list of the snippets currently available:
+  Here is a list of available snippets:
 
    - *LocalLauncher / locallauncher* 
    - *DockerLauncher / dockerlauncher*
