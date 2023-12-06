@@ -65,22 +65,22 @@ Features
    - *query / plot*
 
 
-PyEnSight Debug Session and WebView
+PyEnSight debug session and WebView
 ------------------------------------
 
 You can launch a PyEnSight debug session using **PyEnSight: Launch Debug Session** on the command palette.
 You are then asked to select a renderable from the following options:
 
-* **image**: A picture of the current EnSight status
-* **deep_pixel**: A deep-pixel picture of the current EnSight status
-* **animation**: A transient animation of the current dataset and status in EnSight
+* **image**: A picture of the current EnSight status.
+* **deep_pixel**: A deep-pixel picture of the current EnSight status.
+* **animation**: A transient animation of the current dataset and status in EnSight.
 * **webgl**: An embedded AVZ viewer showing the current status of EnSight exported in AVZ
-* **remote**: A VNC stream of the current EnSight rendering window with a simple web UI
+  format.
+* **remote**: A VNC stream of the current EnSight rendering window with a simple web UI.
 * **remote_scene**: A VNC stream to an EnVision_ instance showing the current status of EnSight exported as a scenario. 
-  EnVision_ is a lightweight EnSight_ Viewer that supports high-speed flipbooks, rendering and additional support to create high quality views of your models
-  exported in *scenario* format via EnSight_. It can be helpful when dealing with large transient simulations in order
-  to reduce the size for the analysis and improve the interactivity.
-* **webensight** (beta feature): A VNC stream of the current EnSight rendering window with a full web UI
+  EnVision_ is a lightweight EnSight_ viewer that supports high-speed flipbooks, rendering, and additional features for creating high-quality views of your models
+  exported in *scenario* format via EnSight_. EnVision can reduce the size of the analysis when dealing with large transient simulations and improve the interactivity.
+* **webensight** (beta feature): A VNC stream of the current EnSight rendering window with a full web UI.
 
 .. image:: images/pyensightremote.gif
    :width: 600
