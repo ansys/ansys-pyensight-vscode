@@ -78,7 +78,7 @@ renderable from the following options:
 -   **webensight** (beta feature): A VNC stream of the current EnSight
     rendering window with a full web UI.
 
-![image](https://github.com/ansys/ansys-pyensight-vscode/raw/main/images/pyensightremote.gif){width="600px"}
+![image](images/pyensightremote.gif){width="600px"}
 
 Selecting a renderable option launches a standard Python debug session.
 At the first breakpoint where at least a PyEnSight object is available
@@ -88,7 +88,7 @@ panel also displays the current status of the postprocessing session. As
 you walk through the script, you can see the updated renderable so that
 you can follow what is happening in EnSight while debugging the script.
 
-![image](https://github.com/ansys/ansys-pyensight-vscode/raw/main/images/pyensightsession.gif){width="600px"}
+![image](images/pyensightsession.gif){width="600px"}
 
 Alternatively, you can launch the panel after a Python debug session has
 been started using **PyEnSight: Launch WebView** on the command palette.
