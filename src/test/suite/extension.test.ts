@@ -59,31 +59,31 @@ mocha.describe('Extension Test Suite', () => {
 	
 	mocha.it('Assert commands', () => {
 		const expected = [
-			{
+			  {
 				"command": "pyensight.Help",
 				"title": "PyEnSight: Help"
-			},
-		    {
+			  },
+			  {
 				"command": "pyensight.Install",
 				"title": "PyEnSight: Install PyEnSight"
-			},
-			{
+			  },
+			  {
 				"command": "pyensight.debug",
 				"title": "PyEnSight: Launch Debug Session"
-			},
-			{
+			  },
+			  {
 				"command": "pyensight.webview",
 				"title": "PyEnSight: Launch WebView"
-			},
-			{
+			  },
+			  {
 				"command": "pyensight.docs",
 				"title": "PyEnSight: Open the PyEnSight documentation"
-			},
-			{
-			    "command": "pyensight.apidocs",
+			  },
+			  {
+				"command": "pyensight.apidocs",
 				"title": "PyEnSight: Open the EnSight Python API documentation"
-			},
-			{
+			  },
+			  {
 				"command": "pyensight.cheatsheet",
 				"title": "PyEnSight: Open the PyEnSight CheatSheet"
 			  }
