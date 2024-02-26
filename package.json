@@ -1,6 +1,6 @@
 {
   "name": "pyensight",
-  "publisher": "ansys",
+  "publisher": "AnsysDevelopers",
   "displayName": "PyEnSight",
   "description": "A VS Code extension to write and debug EnSight Scripts",
   "repository": {"url": "https://github.com/ansys-internal/ansys-pyensight-vscode", "type": "git"},
